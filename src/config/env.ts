@@ -1,7 +1,7 @@
 // Configuration centralisée des variables d'environnement
 export const ENV_CONFIG = {
   // API Configuration
-  API_BASE_URL: import.meta.env.VITE_API_BASE_URL || "http://localhost:3002",
+  API_BASE_URL: import.meta.env.VITE_API_BASE_URL || "http://localhost:3001",
 
   // Environment
   NODE_ENV: import.meta.env.VITE_NODE_ENV || "development",

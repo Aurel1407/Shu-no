@@ -19,7 +19,7 @@ const options = {
       {
         url: process.env.NODE_ENV === 'production'
           ? 'https://api.shu-no.com'
-          : `http://localhost:${process.env.PORT || 3002}`,
+          : `http://localhost:${process.env.PORT || 3001}`,
         description: process.env.NODE_ENV === 'production' ? 'Production server' : 'Development server',
       },
     ],

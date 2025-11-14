@@ -15,15 +15,15 @@ timeout /t 2 /nobreak >nul
 REM Vérifier la disponibilité des ports
 echo [2/6] Vérification de la disponibilité des ports...
 
-REM Vérifier le port 3002 (Backend)
-netstat -ano | findstr ":3002" >nul
+REM Vérifier le port 3001 (Backend)
+netstat -ano | findstr ":3001" >nul
 if %errorlevel% == 0 (
-    echo ERREUR: Le port 3002 est déjà utilisé!
+    echo ERREUR: Le port 3001 est déjà utilisé!
     echo Tentative de libération du port...
-    for /f "tokens=5" %%a in ('netstat -ano ^| findstr ":3002"') do taskkill /F /PID %%a >nul 2>&1
+    for /f "tokens=5" %%a in ('netstat -ano ^| findstr ":3001"') do taskkill /F /PID %%a >nul 2>&1
     timeout /t 2 /nobreak >nul
 ) else (
-    echo ✓ Port 3002 disponible
+    echo ✓ Port 3001 disponible
 )
 
 REM Vérifier le port 8080 (Frontend)
@@ -43,7 +43,7 @@ REM Démarrage du serveur Backend
 echo [3/6] Démarrage du serveur Backend (API)...
 cd /d "c:\Users\aurel\Desktop\LiberKey\LiberKey\MyApps\laragon\www\Shu-no\backend"
 start /B "Backend Server" cmd /c "npm run dev"
-echo ✓ Backend démarré sur le port 3002
+echo ✓ Backend démarré sur le port 3001
 
 echo.
 
@@ -69,9 +69,9 @@ echo    SERVEURS DÉMARRÉS AVEC SUCCÈS !
 echo =============================================
 echo.
 echo 🌐 Frontend:  http://localhost:8080
-echo 🔧 Backend:   http://localhost:3002
+echo 🔧 Backend:   http://localhost:3001
 echo 👤 Admin:     http://localhost:8080/admin/login
-echo 💾 API Docs:  http://localhost:3002/api/health
+echo 💾 API Docs:  http://localhost:3001/api/health
 echo.
 echo =============================================
 
