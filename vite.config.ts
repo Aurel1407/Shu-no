@@ -26,6 +26,11 @@ export default defineConfig(({ mode }) => ({
     exclude: ['**/node_modules/**', '**/backend/**'],
     testTimeout: 60000, // Augmenté de 30s à 60s pour tests lourds
     hookTimeout: 60000, // Augmenté de 30s à 60s pour hooks lourds
+    // Réduire le parallélisme pour éviter les blocages
+    fileParallelism: false, // Exécuter les fichiers de test séquentiellement
+    maxConcurrency: 5, // Limiter à 5 tests simultanés au lieu de illimité
+    minWorkers: 1, // Minimum 1 worker
+    maxWorkers: 2, // Maximum 2 workers au lieu de tous les CPU
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
