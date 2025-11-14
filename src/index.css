@@ -1,0 +1,203 @@
+/* Import Leaflet CSS */
+@import "leaflet/dist/leaflet.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Variables CSS pour thème clair avec tons bleus améliorés */
+@layer base {
+  :root {
+    --background: 210 28% 95%; /* légèrement plus foncé */
+    --foreground: 220 15% 15%; /* plus contrasté */
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 15% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 15% 15%;
+
+    --primary: 210 80% 25%; /* bleu-profond plus foncé et saturé */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 200 70% 35%; /* bleu-moyen plus foncé pour plus de contraste */
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 210 25% 88%; /* plus contrasté */
+    --muted-foreground: 220 15% 35%; /* plus visible et contrasté */
+
+    --accent: 195 75% 55%; /* bleu-clair plus saturé et plus foncé */
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 200 50% 50%; /* bordures plus visibles et contrastées */
+    --input: 0 0% 98%;
+    --ring: 200 70% 35%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 210 28% 95%;
+    --sidebar-foreground: 220 15% 15%;
+    --sidebar-primary: 210 80% 25%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 200 70% 35%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 200 50% 50%;
+    --sidebar-ring: 200 70% 35%;
+  }
+
+  .dark {
+    --background: 220 30% 12%; /* fond plus foncé avec moins de bleu */
+    --foreground: 0 0% 98%; /* texte très clair */
+
+    --card: 220 25% 16%; /* cartes légèrement plus claires que le fond */
+    --card-foreground: 0 0% 98%; /* texte blanc sur cartes */
+
+    --popover: 220 25% 16%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 200 90% 70%; /* bleu lumineux mais pas agressif */
+    --primary-foreground: 220 30% 12%; /* texte foncé sur bleu */
+
+    --secondary: 195 70% 55%; /* bleu moyen, moins clair pour éviter l'agressivité */
+    --secondary-foreground: 220 30% 12%; /* texte foncé */
+
+    --muted: 220 20% 18%; /* fond muted contrasté */
+    --muted-foreground: 0 0% 85%; /* texte clair mais pas éblouissant */
+
+    --accent: 195 70% 55%; /* bleu doux pour les accents */
+    --accent-foreground: 220 30% 12%;
+
+    --destructive: 0 75% 65%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 220 15% 25%; /* bordures visibles */
+    --input: 220 20% 18%;
+    --ring: 200 90% 70%;
+
+    --sidebar-background: 220 30% 12%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 200 90% 70%;
+    --sidebar-primary-foreground: 220 30% 12%;
+    --sidebar-accent: 195 70% 55%; /* cohérence avec --accent */
+    --sidebar-accent-foreground: 220 30% 12%;
+    --sidebar-border: 220 15% 25%;
+    --sidebar-ring: 200 90% 70%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-open-sans;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-playfair;
+  }
+}
+
+/* Styles pour Leaflet */
+
+.leaflet-container {
+  font-family: inherit !important;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.leaflet-popup-content {
+  margin: 0;
+  font-family: inherit;
+}
+
+.custom-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Styles pour les marqueurs personnalisés */
+.leaflet-div-icon {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Amélioration de la visibilité des boutons en mode clair */
+@layer components {
+  .btn-primary-enhanced {
+    @apply bg-gradient-to-r from-bleu-profond to-bleu-moyen hover:from-bleu-profond/90 hover:to-bleu-moyen/90 text-white border-2 border-bleu-profond shadow-lg hover:shadow-xl transition-all duration-300;
+  }
+
+  .btn-outline-enhanced {
+    @apply border-2 border-bleu-profond text-bleu-profond bg-white/80 hover:bg-bleu-profond hover:text-white shadow-md hover:shadow-lg transition-all duration-300 backdrop-blur-sm;
+  }
+
+  .btn-admin-enhanced {
+    @apply bg-bleu-profond text-white hover:bg-bleu-moyen border border-bleu-profond shadow-md hover:shadow-lg transition-all duration-300;
+  }
+}
+
+/* Amélioration spécifique pour les boutons d'administration */
+.admin-section .btn {
+  @apply shadow-md border border-border/50;
+}
+
+.admin-section .btn:hover {
+  @apply shadow-lg transform translate-y-[-1px];
+}
+
+/* Classe utilitaire pour le screen reader (texte caché visuellement mais accessible) */
+@layer utilities {
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  /* Afficher sr-only au focus */
+  .sr-only:focus,
+  .sr-only:focus-within,
+  .sr-only:active {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: inherit;
+    margin: 0;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+  }
+
+  /* Styles pour le focus visible accessible */
+  .focus-visible:focus-visible {
+    @apply outline-2 outline-offset-2 outline-bleu-profond;
+  }
+}
+
+/* Respect des préférences d'animation réduites */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

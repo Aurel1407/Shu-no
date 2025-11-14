@@ -1,0 +1,60 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Development planning (not tracked)
+FEATURES_TODO.md
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Coverage reports
+coverage/
+.nyc_output/
+
+# Test output files
+*.test.result
+test-results.json
+tests-output.txt
+sprint*.txt
+
+# Temporary files
+*.tmp
+*.backup
+*.bak
+
+# Rapport de stage personnel - contient des informations sensibles
+RAPPORT_STAGE_*.md
+docs/rapport-stage/
+RESUME_EXECUTIF.md
+TABLE_DES_FIGURES.md
+PLAN_NUMEROTATION.md
+EXTRAITS_CODE_SIMPLIFIES.md
+CHRONOLOGIE_VISUELLE.md
+Rapport_de_stage_*.docx
+

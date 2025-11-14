@@ -1,0 +1,56 @@
+%% Diagramme d'architecture globale de Shu-no
+graph TD
+    %% ----- Couche Front-end -----
+    subgraph Front-end ["Front-end (React/TypeScript)"]
+        A[UI Components] -->|"Props/State"| B[React Query]
+        B -->|"Requêtes API"| C[Axios]
+        C -->|"Toast notifications"| D[Sonner]
+        A -->|"Thème/Mode sombre"| E[Radix UI]
+        style Front-end fill:#f9f,stroke:#333
+    end
+
+    %% ----- Couche Back-end -----
+    subgraph Back-end ["Back-end (Node.js/Express)"]
+        F[Controllers] -->|"Logique de routage"| G[Services]
+        G -->|"Logique métier"| H[Repositories]
+        H -->|"TypeORM"| I[PostgreSQL]
+        J[Middlewares] -->|"Sécurité"| F
+        K[Redis] -->|"Cache"| H
+        style Back-end fill:#bbf,stroke:#333
+    end
+
+    %% ----- Couche Base de Données -----
+    subgraph Database ["Base de Données"]
+        I -->|"Tables"| L[Users]
+        I -->|"Tables"| M[Products]
+        I -->|"Tables"| N[Orders]
+        I -->|"Tables"| O[PricePeriods]
+        I -->|"Tables"| P[Contact]
+        I -->|"Tables"| Q[RefreshToken]
+        I -->|"Tables"| R[Setting]
+        style Database fill:#f96,stroke:#333
+    end
+
+    %% ----- Couche Infrastructure -----
+    subgraph Infrastructure ["Infrastructure (Développement)"]
+        S[Docker Compose] -->|"Conteneurs"| T[PostgreSQL]
+        S -->|"Conteneurs"| U[Redis]
+        V[Vite Dev Server] -->|"Build"| A
+        W[Cloudinary] -->|"CDN Images"| M
+        style Infrastructure fill:#9f9,stroke:#333
+    end
+
+    %% ----- Interactions -----
+    C -->|"Requêtes HTTP"| F
+    H -->|"Requêtes SQL"| I
+    K -->|"Cache"| G
+    X[Utilisateur] -->|"Navigation"| A
+    X -->|"Réservations"| C
+    G -->|"Error Service"| D
+
+    %% ----- Légende -----
+    linkStyle default stroke-width:2px
+    classDef front fill:#f9f,stroke:#333
+    classDef back fill:#bbf,stroke:#333
+    classDef db fill:#f96,stroke:#333
+    classDef infra fill:#9f9,stroke:#333

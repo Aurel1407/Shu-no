@@ -1,0 +1,39 @@
+# Dépendances
+node_modules
+package-lock.json
+yarn.lock
+
+# Build
+dist
+build
+.next
+out
+
+# Logs
+*.log
+logs
+
+# Fichiers temporaires
+*.tmp
+.cache
+
+# IDE
+.vscode
+.idea
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environnement
+.env
+.env.local
+.env.*.local
+
+# Test
+coverage
+.nyc_output
+
+# Autres
+*.min.js
+*.min.css
