@@ -17,13 +17,13 @@ export const createTestTokens = (users: { adminUser: User; normalUser: User }) =
     id: users.adminUser.id,
     email: users.adminUser.email,
     role: users.adminUser.role,
-  } as any);
+  } as { id: number; email: string; role: string });
 
   const userToken = generateToken({
     id: users.normalUser.id,
     email: users.normalUser.email,
     role: users.normalUser.role,
-  } as any);
+  } as { id: number; email: string; role: string });
 
   return { adminToken, userToken };
 };

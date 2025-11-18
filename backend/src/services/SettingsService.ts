@@ -1,5 +1,5 @@
 export class SettingsService {
-  private settings: Map<string, any> = new Map();
+  private settings: Map<string, unknown> = new Map();
 
   constructor() {
     // Initialiser avec des valeurs par défaut
@@ -7,7 +7,7 @@ export class SettingsService {
   }
 
   async getAutoConfirmSettings(): Promise<{ enabled: boolean }> {
-    const enabled = this.settings.get('autoConfirmEnabled') || false;
+    const enabled = Boolean(this.settings.get('autoConfirmEnabled'));
     return { enabled };
   }
 
@@ -22,6 +22,6 @@ export class SettingsService {
 
   // Méthode pour vérifier si la confirmation automatique est activée
   isAutoConfirmEnabled(): boolean {
-    return this.settings.get('autoConfirmEnabled') || false;
+    return Boolean(this.settings.get('autoConfirmEnabled'));
   }
 }

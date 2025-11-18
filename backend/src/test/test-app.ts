@@ -43,7 +43,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Override AppDataSource avec TestDataSource pour les tests
 // Cette astuce permet à l'app d'utiliser la base de test
-const originalAppDataSource = require('../config/database').AppDataSource;
+const originalAppDataSource = await import('../config/database').then(m => m.AppDataSource);
 if (originalAppDataSource) {
   Object.setPrototypeOf(originalAppDataSource, TestDataSource);
   Object.assign(originalAppDataSource, TestDataSource);

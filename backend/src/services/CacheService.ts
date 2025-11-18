@@ -14,7 +14,7 @@ interface CacheEntry<T> {
 }
 
 class CacheService {
-  private readonly cache: Map<string, CacheEntry<any>> = new Map();
+  private readonly cache: Map<string, CacheEntry<unknown>> = new Map();
   private readonly DEFAULT_TTL = 5 * 60 * 1000; // 5 minutes en millisecondes
 
   /**
@@ -214,13 +214,13 @@ export function startCacheCleanup(intervalMs: number = 10 * 60 * 1000) {
  */
 export function Cacheable(keyPrefix: string, ttl: number = CacheTTL.FIVE_MINUTES) {
   return function (
-    target: any,
+    target: object,
     propertyKey: string,
     descriptor: PropertyDescriptor
   ) {
     const originalMethod = descriptor.value;
 
-    descriptor.value = async function (...args: any[]) {
+    descriptor.value = async function (...args: unknown[]) {
       // Générer une clé unique basée sur les arguments
       const cacheKey = `${keyPrefix}:${JSON.stringify(args)}`;
 

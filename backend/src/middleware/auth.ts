@@ -2,8 +2,14 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { logError, logDebug, logWarn } from '../config/logger';
 
+interface JwtPayload {
+  id: number;
+  email: string;
+  role: string;
+}
+
 interface AuthRequest extends Request {
-  user?: any;
+  user?: JwtPayload;
 }
 
 // Vérification de la présence du JWT_SECRET au démarrage
@@ -27,7 +33,7 @@ export const authenticateToken = (req: AuthRequest, res: Response, next: NextFun
     return res.status(401).json({ success: false, error: 'Token d\'authentification requis' });
   }
 
-  jwt.verify(token, process.env.JWT_SECRET!, (err: any, user: any) => {
+  jwt.verify(token, process.env.JWT_SECRET!, (err: jwt.VerifyErrors | null, decoded: unknown) => {
     if (err) {
       logWarn('Authentication failed: invalid token', { 
         error: err.message,
@@ -36,6 +42,7 @@ export const authenticateToken = (req: AuthRequest, res: Response, next: NextFun
       return res.status(401).json({ success: false, error: 'Token invalide' });
     }
 
+    const user = decoded as JwtPayload;
     logDebug('Authentication successful', { 
       userId: user?.id,
       userRole: user?.role 
