@@ -24,17 +24,30 @@ export const generateCSRFToken = (userId: number, sessionId: string): string => 
     // Token CSRF avec expiration courte (15 minutes)
     return jwt.sign(payload, process.env.JWT_SECRET!, { expiresIn: '15m' });
   } catch (error) {
-    logError(new Error('Failed to generate CSRF token'), { error: (error as Error).message, userId });
+    logError(new Error('Failed to generate CSRF token'), {
+      error: (error as Error).message,
+      userId,
+    });
     throw error;
   }
 };
+
+/**
+ * Interface pour les utilisateurs décodés du JWT
+ */
+interface JwtUser {
+  id: number;
+  userId: number;
+  sessionId?: string;
+  type?: string;
+}
 
 /**
  * Vérifie un token CSRF
  */
 export const verifyCSRFToken = (token: string, userId: number, sessionId: string): boolean => {
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtUser;
 
     // Vérifier que le token est de type CSRF
     if (decoded.type !== 'csrf') {
@@ -50,7 +63,10 @@ export const verifyCSRFToken = (token: string, userId: number, sessionId: string
 
     // Vérifier que la session correspond
     if (decoded.sessionId !== sessionId) {
-      logWarn('CSRF token session mismatch', { tokenSessionId: decoded.sessionId, requestSessionId: sessionId });
+      logWarn('CSRF token session mismatch', {
+        tokenSessionId: decoded.sessionId,
+        requestSessionId: sessionId,
+      });
       return false;
     }
 
@@ -64,8 +80,8 @@ export const verifyCSRFToken = (token: string, userId: number, sessionId: string
 /**
  * Middleware pour vérifier les tokens CSRF sur les requêtes state-changing
  */
-const resolveUserFromRequest = (req: Request): { user: any | null; invalidToken: boolean } => {
-  const existingUser = (req as any).user;
+const resolveUserFromRequest = (req: Request): { user: JwtUser | null; invalidToken: boolean } => {
+  const existingUser = (req as { user?: JwtUser }).user;
   if (existingUser) {
     return { user: existingUser, invalidToken: false };
   }
@@ -81,8 +97,8 @@ const resolveUserFromRequest = (req: Request): { user: any | null; invalidToken:
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
-    (req as any).user = decoded;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtUser;
+    (req as { user?: JwtUser }).user = decoded;
     return { user: decoded, invalidToken: false };
   } catch (error) {
     logWarn('CSRF token auth verification failed', { error: (error as Error).message });
@@ -103,7 +119,7 @@ export const csrfProtection = (req: CSRFRequest, res: Response, next: NextFuncti
     res.status(401).json({
       success: false,
       error: 'Token invalide',
-      message: 'Le token d\'authentification fourni n\'est pas valide'
+      message: "Le token d'authentification fourni n'est pas valide",
     });
     return;
   }
@@ -113,21 +129,20 @@ export const csrfProtection = (req: CSRFRequest, res: Response, next: NextFuncti
   }
 
   // Récupérer le token CSRF depuis les headers ou le body
-  const csrfToken = req.headers['x-csrf-token'] as string ||
-                   req.body?._csrf ||
-                   req.query._csrf as string;
+  const csrfToken =
+    (req.headers['x-csrf-token'] as string) || req.body?._csrf || (req.query._csrf as string);
 
   if (!csrfToken) {
     logWarn('Missing CSRF token', {
       method: req.method,
       url: req.originalUrl,
       userId: user.id,
-      ip: req.ip
+      ip: req.ip,
     });
     res.status(403).json({
       success: false,
       error: 'Token CSRF manquant',
-      message: 'Un token CSRF est requis pour cette requête'
+      message: 'Un token CSRF est requis pour cette requête',
     });
     return;
   }
@@ -142,12 +157,12 @@ export const csrfProtection = (req: CSRFRequest, res: Response, next: NextFuncti
       method: req.method,
       url: req.originalUrl,
       userId: user.id,
-      ip: req.ip
+      ip: req.ip,
     });
     res.status(403).json({
       success: false,
       error: 'Token CSRF invalide',
-      message: 'Le token CSRF fourni n\'est pas valide'
+      message: "Le token CSRF fourni n'est pas valide",
     });
     return;
   }
@@ -201,7 +216,7 @@ export const getCSRFToken = (req: CSRFRequest, res: Response): void => {
     res.status(401).json({
       success: false,
       error: 'Token invalide',
-      message: 'Le token d\'authentification fourni n\'est pas valide'
+      message: "Le token d'authentification fourni n'est pas valide",
     });
     return;
   }
@@ -210,7 +225,7 @@ export const getCSRFToken = (req: CSRFRequest, res: Response): void => {
     res.status(401).json({
       success: false,
       error: 'Non autorisé',
-      message: 'Vous devez être connecté pour obtenir un token CSRF'
+      message: 'Vous devez être connecté pour obtenir un token CSRF',
     });
     return;
   }
@@ -221,7 +236,7 @@ export const getCSRFToken = (req: CSRFRequest, res: Response): void => {
   res.json({
     success: true,
     data: {
-      csrfToken
-    }
+      csrfToken,
+    },
   });
 };

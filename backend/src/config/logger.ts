@@ -2,12 +2,13 @@ import winston from 'winston';
 import path from 'path';
 
 // Définir le niveau de log selon l'environnement
-const logLevel = process.env.LOG_LEVEL || (process.env.NODE_ENV === 'production' ? 'info' : 'debug');
+const logLevel =
+  process.env.LOG_LEVEL || (process.env.NODE_ENV === 'production' ? 'info' : 'debug');
 
 // Configuration des formats
 const logFormat = winston.format.combine(
   winston.format.timestamp({
-    format: 'YYYY-MM-DD HH:mm:ss'
+    format: 'YYYY-MM-DD HH:mm:ss',
   }),
   winston.format.errors({ stack: true }),
   winston.format.json()
@@ -17,19 +18,19 @@ const logFormat = winston.format.combine(
 const consoleFormat = winston.format.combine(
   winston.format.colorize(),
   winston.format.timestamp({
-    format: 'HH:mm:ss'
+    format: 'HH:mm:ss',
   }),
   winston.format.printf(({ timestamp, level, message, stack, ...meta }) => {
     let log = `${timestamp} [${level}]: ${message}`;
-    
+
     if (stack) {
       log += `\n${stack}`;
     }
-    
+
     if (Object.keys(meta).length > 0) {
       log += `\n${JSON.stringify(meta, null, 2)}`;
     }
-    
+
     return log;
   })
 );
@@ -45,7 +46,7 @@ if (process.env.NODE_ENV !== 'production') {
   transports.push(
     new winston.transports.Console({
       level: logLevel,
-      format: consoleFormat
+      format: consoleFormat,
     })
   );
 }
@@ -59,7 +60,7 @@ if (process.env.NODE_ENV === 'production') {
       level: 'info',
       format: logFormat,
       maxsize: 5242880, // 5MB
-      maxFiles: 5
+      maxFiles: 5,
     })
   );
 
@@ -70,7 +71,7 @@ if (process.env.NODE_ENV === 'production') {
       level: 'error',
       format: logFormat,
       maxsize: 5242880, // 5MB
-      maxFiles: 5
+      maxFiles: 5,
     })
   );
 
@@ -78,10 +79,7 @@ if (process.env.NODE_ENV === 'production') {
   transports.push(
     new winston.transports.Console({
       level: 'warn',
-      format: winston.format.combine(
-        winston.format.timestamp(),
-        winston.format.simple()
-      )
+      format: winston.format.combine(winston.format.timestamp(), winston.format.simple()),
     })
   );
 }
@@ -93,55 +91,61 @@ export const logger = winston.createLogger({
   transports,
   exitOnError: false, // Ne pas quitter le processus sur une erreur
   // Gérer les exceptions non capturées
-  exceptionHandlers: process.env.NODE_ENV === 'production' ? [
-    new winston.transports.File({
-      filename: path.join(logDir, 'exceptions.log'),
-      format: logFormat
-    })
-  ] : [
-    new winston.transports.Console({
-      format: consoleFormat
-    })
-  ],
+  exceptionHandlers:
+    process.env.NODE_ENV === 'production'
+      ? [
+          new winston.transports.File({
+            filename: path.join(logDir, 'exceptions.log'),
+            format: logFormat,
+          }),
+        ]
+      : [
+          new winston.transports.Console({
+            format: consoleFormat,
+          }),
+        ],
   // Gérer les rejections de promesses non capturées
-  rejectionHandlers: process.env.NODE_ENV === 'production' ? [
-    new winston.transports.File({
-      filename: path.join(logDir, 'rejections.log'),
-      format: logFormat
-    })
-  ] : [
-    new winston.transports.Console({
-      format: consoleFormat
-    })
-  ]
+  rejectionHandlers:
+    process.env.NODE_ENV === 'production'
+      ? [
+          new winston.transports.File({
+            filename: path.join(logDir, 'rejections.log'),
+            format: logFormat,
+          }),
+        ]
+      : [
+          new winston.transports.Console({
+            format: consoleFormat,
+          }),
+        ],
 });
 
 // Stream pour Morgan (logs HTTP)
 export const morganStream = {
   write: (message: string) => {
     logger.info(message.trim(), { service: 'http' });
-  }
+  },
 };
 
 // Fonctions utilitaires pour le logging
-export const logError = (error: Error, context?: any) => {
+export const logError = (error: Error, context?: unknown) => {
   logger.error('Application Error', {
     message: error.message,
     stack: error.stack,
     context,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 };
 
-export const logInfo = (message: string, meta?: any) => {
+export const logInfo = (message: string, meta?: unknown) => {
   logger.info(message, meta);
 };
 
-export const logWarn = (message: string, meta?: any) => {
+export const logWarn = (message: string, meta?: unknown) => {
   logger.warn(message, meta);
 };
 
-export const logDebug = (message: string, meta?: any) => {
+export const logDebug = (message: string, meta?: unknown) => {
   logger.debug(message, meta);
 };
 
@@ -150,6 +154,6 @@ if (process.env.NODE_ENV !== 'test') {
   logger.info('Logger configured', {
     level: logLevel,
     environment: process.env.NODE_ENV || 'development',
-    transports: transports.map(t => t.constructor.name)
+    transports: transports.map((t) => t.constructor.name),
   });
 }

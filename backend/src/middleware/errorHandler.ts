@@ -26,13 +26,13 @@ export const errorHandler = (
   next: NextFunction
 ) => {
   // Générer un ID unique pour la requête (pour traçabilité)
-  const requestId = req.headers['x-request-id'] as string || generateRequestId();
+  const requestId = (req.headers['x-request-id'] as string) || generateRequestId();
 
   // Gestion spéciale des erreurs SQLite
   if (err.name === 'QueryFailedError' && err.message.includes('SQLITE_CONSTRAINT')) {
     let statusCode = 400;
     let message = 'Les données fournies ne respectent pas les contraintes.';
-    
+
     if (err.message.includes('UNIQUE constraint failed')) {
       statusCode = 409;
       if (err.message.includes('user.email')) {
@@ -56,7 +56,7 @@ export const errorHandler = (
       statusCode,
       timestamp: new Date().toISOString(),
       path: req.originalUrl,
-      requestId
+      requestId,
     };
 
     logError(err, {
@@ -64,13 +64,13 @@ export const errorHandler = (
       method: req.method,
       url: req.originalUrl,
       ip: req.ip,
-      userId: (req as any).user?.id,
+      userId: (req as { user?: { id: number } }).user?.id,
       body: sanitizeBody(req.body),
       query: req.query,
       params: req.params,
       statusCode,
       isOperational: true,
-      context: {}
+      context: {},
     });
 
     res.status(statusCode).json(errorResponse);
@@ -101,7 +101,7 @@ export const errorHandler = (
     params: req.params,
     statusCode,
     isOperational,
-    context
+    context,
   };
 
   // Logger l'erreur
@@ -115,7 +115,7 @@ export const errorHandler = (
     statusCode,
     timestamp: new Date().toISOString(),
     path: req.originalUrl,
-    requestId
+    requestId,
   };
 
   // Ajouter des détails en développement
@@ -123,7 +123,7 @@ export const errorHandler = (
     errorResponse.details = {
       stack: err.stack,
       context,
-      originalMessage: err.message
+      originalMessage: err.message,
     };
   }
 
@@ -134,7 +134,9 @@ export const errorHandler = (
 /**
  * Middleware pour capturer les erreurs des routes async
  */
-export const asyncHandler = (fn: (req: Request, res: Response, next: NextFunction) => Promise<void>) => {
+export const asyncHandler = (
+  fn: (req: Request, res: Response, next: NextFunction) => Promise<void>
+) => {
   return (req: Request, res: Response, next: NextFunction) => {
     return Promise.resolve(fn(req, res, next)).catch(next);
   };
@@ -144,16 +146,11 @@ export const asyncHandler = (fn: (req: Request, res: Response, next: NextFunctio
  * Middleware pour les routes non trouvées (404)
  */
 export const notFoundHandler = (req: Request, res: Response, next: NextFunction): void => {
-  const error = new AppError(
-    `Route ${req.method} ${req.originalUrl} non trouvée`,
-    404,
-    true,
-    {
-      method: req.method,
-      url: req.originalUrl,
-      availableRoutes: getAvailableRoutes()
-    }
-  );
+  const error = new AppError(`Route ${req.method} ${req.originalUrl} non trouvée`, 404, true, {
+    method: req.method,
+    url: req.originalUrl,
+    availableRoutes: getAvailableRoutes(),
+  });
 
   next(error);
 };
@@ -168,7 +165,7 @@ export const setupGlobalErrorHandlers = (): void => {
     logger.error('Unhandled Promise Rejection', {
       reason: error.message,
       stack: error.stack,
-      promise: promise.toString()
+      promise: promise.toString(),
     });
 
     // Fermer le serveur gracieusement
@@ -182,7 +179,7 @@ export const setupGlobalErrorHandlers = (): void => {
   process.on('uncaughtException', (error: Error) => {
     logger.error('Uncaught Exception', {
       message: error.message,
-      stack: error.stack
+      stack: error.stack,
     });
 
     // Toujours arrêter pour les exceptions non gérées
@@ -203,27 +200,27 @@ function getErrorType(err: Error): string {
   if (err instanceof AppError) {
     return err.constructor.name.replace('Error', '');
   }
-  
+
   // Erreurs TypeORM
   if (err.name === 'QueryFailedError') return 'DatabaseQuery';
   if (err.name === 'EntityNotFoundError') return 'EntityNotFound';
   if (err.name === 'CannotCreateEntityIdMapError') return 'DatabaseMapping';
-  
+
   // Erreurs JWT
   if (err.name === 'JsonWebTokenError') return 'InvalidToken';
   if (err.name === 'TokenExpiredError') return 'ExpiredToken';
-  
+
   // Erreurs Express/Validation
   if (err.name === 'ValidationError') return 'Validation';
   if (err.name === 'CastError') return 'InvalidFormat';
-  
+
   return 'Internal';
 }
 
 function getErrorMessage(err: Error, isOperational: boolean): string {
   // En production, ne pas exposer les détails des erreurs non opérationnelles
   if (process.env.NODE_ENV === 'production' && !isOperational) {
-    return 'Une erreur inattendue s\'est produite. Nos équipes ont été notifiées et travaillent à résoudre le problème.';
+    return "Une erreur inattendue s'est produite. Nos équipes ont été notifiées et travaillent à résoudre le problème.";
   }
 
   // Messages user-friendly pour les erreurs communes
@@ -240,11 +237,11 @@ function getErrorMessage(err: Error, isOperational: boolean): string {
     if (err.message.includes('foreign key')) {
       return 'Impossible de supprimer cette ressource car elle est utilisée ailleurs.';
     }
-    return 'Erreur lors de l\'accès aux données. Veuillez réessayer.';
+    return "Erreur lors de l'accès aux données. Veuillez réessayer.";
   }
 
   if (err.name === 'EntityNotFoundError') {
-    return 'Les informations demandées n\'existent pas.';
+    return "Les informations demandées n'existent pas.";
   }
 
   // Erreurs d'authentification
@@ -267,7 +264,7 @@ function getErrorMessage(err: Error, isOperational: boolean): string {
   }
 
   // Erreur par défaut
-  return 'Une erreur inattendue s\'est produite. Veuillez réessayer ou contacter le support si le problème persiste.';
+  return "Une erreur inattendue s'est produite. Veuillez réessayer ou contacter le support si le problème persiste.";
 }
 
 function sanitizeBody(body: unknown): unknown {
@@ -277,7 +274,7 @@ function sanitizeBody(body: unknown): unknown {
   const sensitiveFields = ['password', 'token', 'secret', 'key', 'authorization'];
   const sanitized = { ...(body as Record<string, unknown>) };
 
-  sensitiveFields.forEach(field => {
+  sensitiveFields.forEach((field) => {
     if (sanitized[field]) {
       sanitized[field] = '[REDACTED]';
     }
@@ -298,9 +295,9 @@ function getAvailableRoutes(): string[] {
   return [
     'GET /api/health',
     'GET /api/users',
-  'POST /api/auth/login',
+    'POST /api/auth/login',
     'GET /api/products',
     'GET /api/orders',
-    'GET /api/price-periods'
+    'GET /api/price-periods',
   ];
 }
