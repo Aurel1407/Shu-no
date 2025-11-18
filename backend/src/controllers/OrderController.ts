@@ -5,6 +5,13 @@ import { authenticateToken, requireAdmin } from '../middleware/auth';
 import { asyncHandler } from '../middleware/errorHandler';
 import { logError } from '../config/logger';
 
+interface AuthRequest extends Request {
+  user?: {
+    id: number;
+    role: string;
+  };
+}
+
 export class OrderController {
   private orderService: OrderService;
 
@@ -62,10 +69,11 @@ export class OrderController {
       const orderData: CreateOrderDto = req.body;
       const order = await this.orderService.createOrder(orderData);
       res.status(201).json(order);
-    } catch (error: any) {
-      if (error.message === 'User not found' || error.message === 'Product not found') {
-        res.status(404).json({ error: error.message });
-      } else if (error.message === 'Invalid date range') {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      if (errorMessage === 'User not found' || errorMessage === 'Product not found') {
+        res.status(404).json({ error: errorMessage });
+      } else if (errorMessage === 'Invalid date range') {
         res.status(400).json({ error: 'Dates invalides' });
       } else {
         res.status(500).json({ error: 'Erreur lors de la création de la réservation' });
@@ -76,7 +84,7 @@ export class OrderController {
   async createPaymentIntent(req: Request, res: Response): Promise<void> {
     try {
       const orderData = req.body;
-      const userId = (req as any).user?.id;
+      const userId = (req as AuthRequest).user?.id;
       
       if (!userId) {
         res.status(401).json({ error: 'Utilisateur non authentifié' });
@@ -107,8 +115,8 @@ export class OrderController {
       };
 
       res.status(201).json(paymentIntent);
-    } catch (error: any) {
-      logError(error, { context: 'Création intent paiement' });
+    } catch (error: unknown) {
+      logError(error instanceof Error ? error : new Error(String(error)), { context: 'Création intent paiement' });
       res.status(500).json({ error: 'Erreur lors de la création de l\'intent de paiement' });
     }
   }
@@ -119,10 +127,11 @@ export class OrderController {
       const orderData: UpdateOrderDto = req.body;
       const order = await this.orderService.updateOrder(id, orderData);
       res.json(order);
-    } catch (error: any) {
-      if (error.message === 'Order not found') {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : '';
+      if (errorMessage === 'Order not found') {
         res.status(404).json({ error: 'Réservation non trouvée' });
-      } else if (error.message === 'Product not found') {
+      } else if (errorMessage === 'Product not found') {
         res.status(404).json({ error: 'Produit non trouvé' });
       } else {
         res.status(500).json({ error: 'Erreur lors de la mise à jour de la réservation' });
@@ -146,9 +155,13 @@ export class OrderController {
     }
   }
 
-  async getMyBookings(req: any, res: Response): Promise<void> {
+  async getMyBookings(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.user.id;
+      const userId = (req as AuthRequest).user?.id;
+      if (!userId) {
+        res.status(401).json({ error: 'Utilisateur non authentifié' });
+        return;
+      }
       const orders = await this.orderService.getOrdersByUserId(userId);
       res.json(orders);
     } catch (error) {

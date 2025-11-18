@@ -6,6 +6,21 @@ import { LoginUserDto } from '../dtos/UserDto';
 import { RefreshTokenDto, RevokeTokenDto } from '../dtos/RefreshTokenDto';
 import jwt from 'jsonwebtoken';
 
+interface UserWithPassword {
+  password?: string;
+  [key: string]: unknown;
+}
+
+type SanitizableUser = UserWithPassword | Record<string, unknown> | null;
+
+interface AuthRequest extends Request {
+  user?: {
+    id: number;
+    email: string;
+    role: string;
+  };
+}
+
 export class AuthController {
   private readonly userService: UserService;
   private readonly refreshTokenService: RefreshTokenService;
@@ -18,12 +33,12 @@ export class AuthController {
     this.refreshTokenService = refreshTokenService;
   }
 
-  private sanitizeUser(user: any) {
+  private sanitizeUser(user: SanitizableUser) {
     if (!user) {
       return user;
     }
 
-    const { password, ...userWithoutPassword } = user;
+    const { password, ...userWithoutPassword } = user as UserWithPassword;
     return userWithoutPassword;
   }
 
@@ -44,7 +59,7 @@ export class AuthController {
     res.json({
       success: true,
       data: {
-        user: this.sanitizeUser(result.user),
+        user: this.sanitizeUser(result.user as unknown as SanitizableUser),
         accessToken: result.token,
         refreshToken: refreshToken.token,
       },
@@ -88,7 +103,7 @@ export class AuthController {
       success: true,
       data: {
         accessToken: newAccessToken,
-        user: this.sanitizeUser(user),
+        user: this.sanitizeUser(user as unknown as SanitizableUser),
       },
       message: 'Access token renouvelé avec succès',
     });
@@ -122,7 +137,11 @@ export class AuthController {
   });
 
   revokeAllRefreshTokens = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const userId = (req as any).user?.id;
+    const userId = (req as AuthRequest).user?.id;
+    if (!userId) {
+      res.status(401).json({ success: false, error: 'Utilisateur non authentifié' });
+      return;
+    }
 
     await this.refreshTokenService.revokeAllUserTokens(userId);
 
@@ -170,7 +189,11 @@ export class AuthController {
   });
 
   getActiveTokens = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const userId = (req as any).user?.id;
+    const userId = (req as AuthRequest).user?.id;
+    if (!userId) {
+      res.status(401).json({ success: false, error: 'Utilisateur non authentifié' });
+      return;
+    }
 
     const activeTokens = await this.refreshTokenService.getUserActiveTokens(userId);
 

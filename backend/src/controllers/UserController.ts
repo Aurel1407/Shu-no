@@ -3,6 +3,19 @@ import { UserService } from '../services/UserService';
 import { CreateUserDto, UpdateUserDto } from '../dtos/UserDto';
 import { asyncHandler } from '../middleware/errorHandler';
 
+interface UserWithPassword {
+  password?: string;
+  [key: string]: unknown;
+}
+
+interface AuthRequest extends Request {
+  user?: {
+    id: number;
+    email: string;
+    role: string;
+  };
+}
+
 export class UserController {
   private readonly userService: UserService;
 
@@ -11,12 +24,12 @@ export class UserController {
   }
 
   // Utilitaire pour supprimer le mot de passe des réponses
-  private removePassword(user: any): any {
+  private removePassword(user: UserWithPassword): Omit<UserWithPassword, 'password'> {
     const { password, ...userWithoutPassword } = user;
     return userWithoutPassword;
   }
 
-  private removePasswordFromArray(users: any[]): any[] {
+  private removePasswordFromArray(users: UserWithPassword[]): Omit<UserWithPassword, 'password'>[] {
     return users.map(user => this.removePassword(user));
   }
 
@@ -24,7 +37,7 @@ export class UserController {
     const users = await this.userService.getAllUsers();
     res.json({
       success: true,
-      data: this.removePasswordFromArray(users),
+      data: this.removePasswordFromArray(users as unknown as UserWithPassword[]),
       count: users.length
     });
   });
@@ -60,12 +73,16 @@ export class UserController {
   });
 
   getProfile = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const userId = (req as any).user?.id;
+    const userId = (req as AuthRequest).user?.id;
+    if (!userId) {
+      res.status(401).json({ success: false, error: 'Utilisateur non authentifié' });
+      return;
+    }
     const user = await this.userService.getUserById(userId);
 
     res.json({
       success: true,
-      data: this.removePassword(user)
+      data: this.removePassword(user as unknown as UserWithPassword)
     });
   });
 
@@ -75,7 +92,7 @@ export class UserController {
     
     res.status(201).json({
       success: true,
-      data: this.removePassword(user),
+      data: this.removePassword(user as unknown as UserWithPassword),
       message: 'Utilisateur créé avec succès'
     });
   });
@@ -83,10 +100,10 @@ export class UserController {
   updateUser = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const id = parseInt(req.params.id);
     const userData: UpdateUserDto = req.body;
-    const currentUser = (req as any).user;
+    const currentUser = (req as AuthRequest).user;
 
     // Vérifier les permissions : seul l'admin ou l'utilisateur lui-même peut se modifier
-    if (currentUser.role !== 'admin' && currentUser.id !== id) {
+    if (!currentUser || (currentUser.role !== 'admin' && currentUser.id !== id)) {
       res.status(403).json({
         success: false,
         message: 'Accès refusé : vous ne pouvez modifier que votre propre profil'
@@ -98,17 +115,17 @@ export class UserController {
     
     res.json({
       success: true,
-      data: this.removePassword(user),
+      data: this.removePassword(user as unknown as UserWithPassword),
       message: 'Utilisateur mis à jour avec succès'
     });
   });
 
   deleteUser = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const id = parseInt(req.params.id);
-    const currentUser = (req as any).user;
+    const currentUser = (req as AuthRequest).user;
 
     // Empêcher l'admin de se supprimer lui-même
-    if (currentUser.id === id) {
+    if (currentUser?.id === id) {
       res.status(400).json({
         success: false,
         message: 'Vous ne pouvez pas supprimer votre propre compte'
@@ -125,12 +142,16 @@ export class UserController {
   });
 
   getCurrentUser = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const userId = (req as any).user?.id;
+    const userId = (req as AuthRequest).user?.id;
+    if (!userId) {
+      res.status(401).json({ success: false, error: 'Utilisateur non authentifié' });
+      return;
+    }
     const user = await this.userService.getUserById(userId);
 
     res.json({
       success: true,
-      data: this.removePassword(user)
+      data: this.removePassword(user as unknown as UserWithPassword)
     });
   });
 }
