@@ -3,7 +3,7 @@ import { useState, useCallback } from "react";
 /**
  * Types de règles de validation
  */
-export type ValidationRule<T = any> = {
+export type ValidationRule<T = unknown> = {
   validate: (value: T) => boolean;
   message: string;
   type?: "error" | "warning";
@@ -31,7 +31,7 @@ export interface FormValidation {
 /**
  * Hook pour la validation de formulaires
  */
-export function useFormValidation<T extends Record<string, any>>(
+export function useFormValidation<T extends Record<string, unknown>>(
   initialValues: T,
   validationRules: Record<keyof T, ValidationRule[]>
 ) {
@@ -44,7 +44,7 @@ export function useFormValidation<T extends Record<string, any>>(
    * Valide un champ spécifique
    */
   const validateField = useCallback(
-    (field: keyof T, value: any): FieldValidation => {
+    (field: keyof T, value: T[keyof T]): FieldValidation => {
       const rules = validationRules[field];
       if (!rules) return { isValid: true };
 
@@ -75,7 +75,7 @@ export function useFormValidation<T extends Record<string, any>>(
    * Met à jour un champ et le valide
    */
   const setFieldValue = useCallback(
-    (field: keyof T, value: any) => {
+    (field: keyof T, value: T[keyof T]) => {
       setValues((prev) => ({ ...prev, [field]: value }));
 
       const validation = validateField(field, value);
@@ -205,7 +205,7 @@ export function useFormValidation<T extends Record<string, any>>(
  */
 export const validationRules = {
   required: (message = "Ce champ est requis"): ValidationRule => ({
-    validate: (value: any) => value !== null && value !== undefined && value !== "",
+    validate: (value: unknown) => value !== null && value !== undefined && value !== "",
     message,
   }),
 
@@ -230,7 +230,7 @@ export const validationRules = {
   }),
 
   numeric: (message = "Valeur numérique requise"): ValidationRule => ({
-    validate: (value: any) => !Number.isNaN(Number(value)) && !Number.isNaN(Number.parseFloat(value)),
+    validate: (value: unknown) => !Number.isNaN(Number(value)) && !Number.isNaN(Number.parseFloat(String(value))),
     message,
   }),
 

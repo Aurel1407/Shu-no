@@ -92,7 +92,7 @@ export const createMockIcon = (iconName: string) => {
 
 // Génération automatique des mocks pour toutes les icônes
 export const createLucideMocks = () => {
-  const mocks: Record<string, any> = {};
+  const mocks: Record<string, () => string> = {};
 
   lucideIconsList.forEach((iconName) => {
     mocks[iconName] = createMockIcon(iconName);

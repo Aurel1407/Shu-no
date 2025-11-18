@@ -12,7 +12,7 @@ interface ErrorResponse {
   statusCode: number;
   timestamp: string;
   path: string;
-  details?: any;
+  details?: Record<string, unknown>;
   requestId?: string;
 }
 
@@ -80,12 +80,12 @@ export const errorHandler = (
   // Déterminer le statut HTTP et si l'erreur est opérationnelle
   let statusCode = 500;
   let isOperational = false;
-  let context: any = {};
+  let context: Record<string, unknown> = {};
 
   if (err instanceof AppError) {
     statusCode = err.statusCode;
     isOperational = err.isOperational;
-    context = err.context;
+    context = (err.context as Record<string, unknown>) || {};
   }
 
   // Construire les métadonnées pour les logs
@@ -95,7 +95,7 @@ export const errorHandler = (
     url: req.originalUrl,
     ip: req.ip,
     userAgent: req.get('User-Agent'),
-    userId: (req as any).user?.id,
+    userId: (req as Request & { user?: { id: string } }).user?.id,
     body: sanitizeBody(req.body),
     query: req.query,
     params: req.params,
@@ -134,7 +134,7 @@ export const errorHandler = (
 /**
  * Middleware pour capturer les erreurs des routes async
  */
-export const asyncHandler = (fn: Function) => {
+export const asyncHandler = (fn: (req: Request, res: Response, next: NextFunction) => Promise<void>) => {
   return (req: Request, res: Response, next: NextFunction) => {
     return Promise.resolve(fn(req, res, next)).catch(next);
   };
@@ -163,10 +163,11 @@ export const notFoundHandler = (req: Request, res: Response, next: NextFunction)
  */
 export const setupGlobalErrorHandlers = (): void => {
   // Promises rejetées non gérées
-  process.on('unhandledRejection', (reason: any, promise: Promise<any>) => {
+  process.on('unhandledRejection', (reason: unknown, promise: Promise<unknown>) => {
+    const error = reason instanceof Error ? reason : new Error(String(reason));
     logger.error('Unhandled Promise Rejection', {
-      reason: reason?.message || reason,
-      stack: reason?.stack,
+      reason: error.message,
+      stack: error.stack,
       promise: promise.toString()
     });
 
@@ -269,12 +270,12 @@ function getErrorMessage(err: Error, isOperational: boolean): string {
   return 'Une erreur inattendue s\'est produite. Veuillez réessayer ou contacter le support si le problème persiste.';
 }
 
-function sanitizeBody(body: any): any {
+function sanitizeBody(body: unknown): unknown {
   if (!body || typeof body !== 'object') return body;
 
   // Supprimer les champs sensibles des logs
   const sensitiveFields = ['password', 'token', 'secret', 'key', 'authorization'];
-  const sanitized = { ...body };
+  const sanitized = { ...(body as Record<string, unknown>) };
 
   sensitiveFields.forEach(field => {
     if (sanitized[field]) {
@@ -285,7 +286,7 @@ function sanitizeBody(body: any): any {
   return sanitized;
 }
 
-function isOperational(error: any): boolean {
+function isOperational(error: unknown): boolean {
   if (error instanceof AppError) {
     return error.isOperational;
   }

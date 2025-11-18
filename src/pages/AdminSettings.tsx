@@ -47,9 +47,9 @@ const AdminSettings = () => {
       // Charger les paramètres depuis l'API
       const data = await authenticatedApiCall("/api/settings");
       setSettings(data);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Erreur lors du chargement des paramètres:", err);
-      setError(err.message || "Erreur lors du chargement des paramètres");
+      setError(err instanceof Error ? err.message : "Erreur lors du chargement des paramètres");
       // Conserver les valeurs par défaut en cas d'erreur
     } finally {
       setLoading(false);
@@ -69,9 +69,9 @@ const AdminSettings = () => {
       });
 
       setSuccess("Paramètres sauvegardés avec succès !");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Erreur lors de la sauvegarde:", err);
-      setError(err.message || "Erreur lors de la sauvegarde des paramètres");
+      setError(err instanceof Error ? err.message : "Erreur lors de la sauvegarde des paramètres");
     } finally {
       setSaving(false);
     }

@@ -56,7 +56,7 @@ const Payment: React.FC = () => {
     null
   );
   const [isProcessing, setIsProcessing] = useState(false);
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [currentUser, setCurrentUser] = useState<{ id: string; email: string; firstName?: string; lastName?: string } | null>(null);
 
   const { apiCall, getAuthToken } = useAuthenticatedApi();
 
@@ -64,6 +64,34 @@ const Payment: React.FC = () => {
   useEffect(() => {
     setTimeout(() => setIsPageReady(true), 100);
   }, []);
+
+  // Récupérer l'utilisateur connecté
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const token = getAuthToken();
+        if (token) {
+          const base64Url = token.split(".")[1];
+          const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+          const jsonPayload = decodeURIComponent(
+            atob(base64)
+              .split("")
+              .map(function (c) {
+                return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+              })
+              .join("")
+          );
+
+          const decoded = JSON.parse(jsonPayload);
+          setCurrentUser({ id: decoded.id, email: decoded.email });
+        }
+      } catch (error) {
+        console.error("Erreur lors de la récupération de l'utilisateur:", error);
+      }
+    };
+
+    fetchCurrentUser();
+  }, [getAuthToken]);
 
   // Vérifier si nous avons les données nécessaires
   if (!state?.property || !state?.checkIn || !state?.checkOut) {
@@ -112,34 +140,6 @@ const Payment: React.FC = () => {
 
   const { property, checkIn, checkOut, guests, notes, totalPrice } = state;
   const nights = differenceInDays(new Date(checkOut), new Date(checkIn));
-
-  // Récupérer l'utilisateur connecté
-  useEffect(() => {
-    const fetchCurrentUser = async () => {
-      try {
-        const token = getAuthToken();
-        if (token) {
-          const base64Url = token.split(".")[1];
-          const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-          const jsonPayload = decodeURIComponent(
-            atob(base64)
-              .split("")
-              .map(function (c) {
-                return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
-              })
-              .join("")
-          );
-
-          const decoded = JSON.parse(jsonPayload);
-          setCurrentUser({ id: decoded.id, email: decoded.email });
-        }
-      } catch (error) {
-        console.error("Erreur lors de la récupération de l'utilisateur:", error);
-      }
-    };
-
-    fetchCurrentUser();
-  }, [getAuthToken]);
 
   const handlePayment = async (method: "stripe" | "paypal") => {
     if (!currentUser) {
@@ -211,7 +211,7 @@ const Payment: React.FC = () => {
           });
         }, 2000);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Erreur lors du paiement:", error);
       setIsProcessing(false);
       setSelectedPaymentMethod(null);

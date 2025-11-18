@@ -16,6 +16,19 @@ import Footer from "@/components/Footer";
 import { useAuthenticatedApi } from "@/hooks/use-authenticated-api";
 import { StatsSkeleton, ChartSkeleton } from "@/components/ui/skeletons";
 
+interface Property {
+  id: number;
+  name: string;
+}
+
+interface Booking {
+  id: string;
+  productId: number;
+  createdAt: string;
+  status: string;
+  totalPrice: string | number;
+}
+
 interface PropertyRevenue {
   id: number;
   name: string;
@@ -59,7 +72,7 @@ const RevenueStats = () => {
       const revenueMap = new Map<number, PropertyRevenue>();
 
       // Initialiser avec toutes les propriétés
-      properties.forEach((property: any) => {
+      properties.forEach((property: Property) => {
         revenueMap.set(property.id, {
           id: property.id,
           name: property.name,
@@ -70,10 +83,10 @@ const RevenueStats = () => {
       });
 
       // Fonction pour filtrer les réservations par période
-      const filterBookingsByPeriod = (booking: any) => {
+      const filterBookingsByPeriod = (booking: Booking) => {
         if (periodFilter === "all") return true;
 
-        const checkInDate = new Date(booking.checkIn);
+        const checkInDate = new Date(booking.createdAt);
         const currentDate = new Date();
 
         if (periodFilter === "month") {
@@ -89,13 +102,13 @@ const RevenueStats = () => {
       };
 
       // Calculer les revenus à partir des réservations confirmées filtrées par période
-      const statusFilteredBookings = bookings.filter((booking: any) => {
+      const statusFilteredBookings = bookings.filter((booking: Booking) => {
         return booking.status === "confirmed" || booking.status === "pending";
       });
 
       const filteredBookings = statusFilteredBookings.filter(filterBookingsByPeriod);
 
-      filteredBookings.forEach((booking: any) => {
+      filteredBookings.forEach((booking: Booking) => {
         const propertyId = booking.product?.id || booking.productId;
         if (propertyId && revenueMap.has(propertyId)) {
           const revenue = parseFloat(booking.totalPrice);

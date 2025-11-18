@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 
 // Preload function for routes
-const preloadRoute = (importFn: () => Promise<any>) => {
+const preloadRoute = (importFn: () => Promise<unknown>) => {
   // Use requestIdleCallback if available, otherwise setTimeout
   const preload = () => importFn();
 

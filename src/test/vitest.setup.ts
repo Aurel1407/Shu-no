@@ -12,14 +12,14 @@ globalThis.IntersectionObserver = class IntersectionObserver {
   takeRecords() {
     return [];
   }
-} as any;
+} as unknown as typeof IntersectionObserver;
 
 // Mock ResizeObserver
 globalThis.ResizeObserver = class ResizeObserver {
   disconnect() {
-    throw new Error('Method not implemented.');
+    // Mock implementation
   }
-} as any;
+} as unknown as typeof ResizeObserver;
 
 // Mock matchMedia
 Object.defineProperty(globalThis, 'matchMedia', {
@@ -80,6 +80,7 @@ globalThis.fetch = vi.fn();
 // Console mock pour réduire le bruit dans les tests
 const originalError = console.error;
 beforeAll(() => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   console.error = (...args: any[]) => {
     if (
       typeof args[0] === 'string' &&

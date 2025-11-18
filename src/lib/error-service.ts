@@ -14,7 +14,7 @@ export interface ApiError {
   statusCode: number;
   timestamp: string;
   path: string;
-  details?: any;
+  details?: Record<string, unknown>;
   requestId?: string;
 }
 
@@ -160,7 +160,7 @@ export class ErrorService {
   private parseError(error: Error | ApiError | string): {
     message: string;
     type: ErrorType;
-    originalError?: any;
+    originalError?: Error | ApiError;
   } {
     if (typeof error === "string") {
       return {
@@ -188,8 +188,8 @@ export class ErrorService {
   /**
    * Vérifie si l'erreur est une ApiError
    */
-  private isApiError(error: any): error is ApiError {
-    return error && typeof error === "object" && "statusCode" in error && "message" in error;
+  private isApiError(error: unknown): error is ApiError {
+    return error !== null && typeof error === "object" && "statusCode" in error && "message" in error;
   }
 
   /**
@@ -264,7 +264,14 @@ export class ErrorService {
   /**
    * Exporte les métriques pour le monitoring externe
    */
-  exportMetrics(): any {
+  exportMetrics(): {
+    timestamp: string;
+    total: number;
+    byType: Record<ErrorType, number>;
+    byStatusCode: Record<number, number>;
+    byContext: Record<string, number>;
+    recent: Array<{ timestamp: Date; message: string; type: ErrorType; context?: string }>;
+  } {
     return {
       timestamp: new Date().toISOString(),
       ...this.metrics,
@@ -275,10 +282,13 @@ export class ErrorService {
   /**
    * Crée un message d'erreur formaté pour les logs
    */
-  formatLogMessage(error: any, context?: string): string {
+  formatLogMessage(error: Error | ApiError | string | unknown, context?: string): string {
     const timestamp = new Date().toISOString();
     const contextStr = context ? `[${context}] ` : "";
-    const message = error?.message || "Unknown error";
+    const message = 
+      typeof error === "string" 
+        ? error 
+        : (error as Error | ApiError)?.message || "Unknown error";
 
     return `${timestamp} ${contextStr}${message}`;
   }

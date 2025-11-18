@@ -18,7 +18,7 @@ export interface ApiCallOptions extends RequestInit {
 /**
  * Fonction utilitaire centralisée pour les appels API avec gestion d'erreurs améliorée
  */
-export const apiCall = async (url: string, options: ApiCallOptions = {}): Promise<any> => {
+export const apiCall = async <T = unknown>(url: string, options: ApiCallOptions = {}): Promise<T> => {
   const {
     showErrorToast = true,
     context = "API Call",
@@ -58,7 +58,10 @@ export const apiCall = async (url: string, options: ApiCallOptions = {}): Promis
           };
         }
 
-        const apiError = new Error(errorData.message) as any;
+        const apiError = new Error(errorData.message) as Error & {
+          statusCode: number;
+          details: ApiError;
+        };
         apiError.statusCode = response.status;
         apiError.details = errorData;
 
@@ -103,11 +106,11 @@ export const apiCall = async (url: string, options: ApiCallOptions = {}): Promis
 /**
  * Fonction pour les appels API avec gestion d'authentification
  */
-export const authenticatedApiCall = async (
+export const authenticatedApiCall = async <T = unknown>(
   url: string,
   options: ApiCallOptions = {},
   token?: string
-): Promise<any> => {
+): Promise<T> => {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(options.headers as Record<string, string>),
@@ -176,6 +179,6 @@ function isNetworkError(error: Error): boolean {
 /**
  * Vérifie si l'erreur est déjà une ApiError traitée
  */
-function isApiError(error: any): boolean {
-  return error && typeof error === "object" && "statusCode" in error && "details" in error;
+function isApiError(error: unknown): boolean {
+  return error !== null && typeof error === "object" && "statusCode" in error && "details" in error;
 }

@@ -26,6 +26,29 @@ import { useAuthenticatedApi } from "@/hooks/use-authenticated-api";
 import { useAsyncOperation } from "@/hooks/use-async-operation";
 import { StatsSkeleton, ChartSkeleton } from "@/components/ui/skeletons";
 
+interface Property {
+  id: string;
+  isActive: boolean;
+}
+
+interface Booking {
+  id: string;
+  status: "pending" | "confirmed" | "cancelled";
+  checkIn: string;
+  checkOut: string;
+  totalPrice: string | number;
+}
+
+interface User {
+  id: string;
+}
+
+interface Contact {
+  id: string;
+  status: string;
+  isRead?: boolean;
+}
+
 interface Stats {
   totalProperties: number;
   activeProperties: number;
@@ -78,7 +101,7 @@ const AdminDashboard = () => {
     const properties = propertiesResponse.data || propertiesResponse; // Support des deux formats
 
     const activeProperties = Array.isArray(properties)
-      ? properties.filter((p: any) => p.isActive).length
+      ? properties.filter((p: Property) => p.isActive).length
       : 0;
 
     // Charger les réservations
@@ -86,13 +109,13 @@ const AdminDashboard = () => {
     const bookings = bookingsResponse.data || bookingsResponse;
 
     const pendingBookings = Array.isArray(bookings)
-      ? bookings.filter((b: any) => b.status === "pending").length
+      ? bookings.filter((b: Booking) => b.status === "pending").length
       : 0;
     const confirmedBookings = Array.isArray(bookings)
-      ? bookings.filter((b: any) => b.status === "confirmed").length
+      ? bookings.filter((b: Booking) => b.status === "confirmed").length
       : 0;
     const cancelledBookings = Array.isArray(bookings)
-      ? bookings.filter((b: any) => b.status === "cancelled").length
+      ? bookings.filter((b: Booking) => b.status === "cancelled").length
       : 0;
 
     // Charger les utilisateurs
@@ -102,15 +125,15 @@ const AdminDashboard = () => {
     // Calculer les revenus
     const totalRevenue = Array.isArray(bookings)
       ? bookings
-          .filter((b: any) => b.status === "confirmed" || b.status === "pending")
-          .reduce((sum: number, b: any) => sum + parseFloat(b.totalPrice || 0), 0)
+          .filter((b: Booking) => b.status === "confirmed" || b.status === "pending")
+          .reduce((sum: number, b: Booking) => sum + parseFloat(String(b.totalPrice || 0)), 0)
       : 0;
 
     // Calculer le taux d'occupation basé sur les réservations du mois en cours
     const currentMonth = new Date().getMonth();
     const currentYear = new Date().getFullYear();
     const monthlyBookings = Array.isArray(bookings)
-      ? bookings.filter((b: any) => {
+      ? bookings.filter((b: Booking) => {
           const checkInDate = new Date(b.checkIn);
           return (
             checkInDate.getMonth() === currentMonth &&
@@ -121,7 +144,7 @@ const AdminDashboard = () => {
       : [];
 
     const monthlyRevenue = monthlyBookings.reduce(
-      (sum: number, b: any) => sum + parseFloat(b.totalPrice || 0),
+      (sum: number, b: Booking) => sum + parseFloat(String(b.totalPrice || 0)),
       0
     );
 
@@ -130,14 +153,14 @@ const AdminDashboard = () => {
     let totalAvailableNights = 0;
 
     if (Array.isArray(properties) && properties.length > 0) {
-      const activeProperties = properties.filter((p: any) => p.isActive);
+      const activeProperties = properties.filter((p: Property) => p.isActive);
       const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
 
       // Nuits disponibles = propriétés actives × jours dans le mois
       totalAvailableNights = activeProperties.length * daysInMonth;
 
       // Calculer les nuits occupées
-      monthlyBookings.forEach((booking: any) => {
+      monthlyBookings.forEach((booking: Booking) => {
         const checkIn = new Date(booking.checkIn);
         const checkOut = new Date(booking.checkOut);
         const monthStart = new Date(currentYear, currentMonth, 1);
@@ -165,7 +188,7 @@ const AdminDashboard = () => {
     const contactsResponse = await apiCall(API_URLS.CONTACTS);
     const contacts = contactsResponse.data || contactsResponse;
     const unreadContacts = Array.isArray(contacts)
-      ? contacts.filter((c: any) => !c.isRead).length
+      ? contacts.filter((c: Contact) => !c.isRead).length
       : 0;
 
     setStats({

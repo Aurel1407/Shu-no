@@ -8,6 +8,20 @@ import Footer from "@/components/Footer";
 import { useAuthenticatedApi } from "@/hooks/use-authenticated-api";
 import { ChartSkeleton } from "@/components/ui/skeletons";
 
+interface Property {
+  id: string;
+  isActive: boolean;
+  name: string;
+}
+
+interface Booking {
+  id: string;
+  checkIn: string;
+  checkOut: string;
+  status: string;
+  totalPrice: string | number;
+}
+
 interface MonthlyOccupancy {
   month: string;
   year: number;
@@ -53,7 +67,7 @@ const OccupancyCharts = () => {
         const monthName = date.toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
 
         // Filtrer les réservations pour ce mois (utiliser checkIn au lieu de createdAt)
-        const monthBookings = bookings.filter((booking: any) => {
+        const monthBookings = bookings.filter((booking: Booking) => {
           const checkInDate = new Date(booking.checkIn);
           return (
             checkInDate.getMonth() === date.getMonth() &&
@@ -63,21 +77,21 @@ const OccupancyCharts = () => {
         });
 
         // Calculer le taux d'occupation basé sur les nuits occupées
-        const activeProperties = properties.filter((p: any) => p.isActive).length;
+        const activeProperties = properties.filter((p: Property) => p.isActive).length;
         let totalOccupiedNights = 0;
         let totalAvailableNights = 0;
 
         if (activeProperties > 0) {
           // Pour chaque propriété active, calculer les nuits disponibles ce mois
           properties
-            .filter((p: any) => p.isActive)
-            .forEach((property: any) => {
+            .filter((p: Property) => p.isActive)
+            .forEach((property: Property) => {
               const daysInMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
               totalAvailableNights += daysInMonth;
             });
 
           // Calculer les nuits occupées par les réservations
-          monthBookings.forEach((booking: any) => {
+          monthBookings.forEach((booking: Booking) => {
             const checkIn = new Date(booking.checkIn);
             const checkOut = new Date(booking.checkOut);
             const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
@@ -102,7 +116,7 @@ const OccupancyCharts = () => {
             : 0;
 
         const revenue = monthBookings.reduce(
-          (sum: number, b: any) => sum + parseFloat(b.totalPrice),
+          (sum: number, b: Booking) => sum + parseFloat(String(b.totalPrice)),
           0
         );
 

@@ -1,19 +1,20 @@
 import React from "react";
 import { Calendar } from "@/components/ui/calendar";
+import type { Locale } from "date-fns";
 
-interface FinalCalendarWithPricesProps {
+interface CalendarWithPricesProps {
   mode: "single";
   selected?: Date | null;
   onSelect: (date: Date | undefined) => void;
   disabled?: (date: Date) => boolean;
   defaultMonth?: Date;
   initialFocus?: boolean;
-  locale?: any;
+  locale?: Locale;
   basePrice: number;
   className?: string;
 }
 
-export const FinalCalendarWithPrices: React.FC<FinalCalendarWithPricesProps> = ({
+export const FinalCalendarWithPrices: React.FC<CalendarWithPricesProps> = ({
   basePrice,
   className = "",
   ...calendarProps

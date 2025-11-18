@@ -23,7 +23,7 @@ export interface AsyncOperationOptions {
  * Hook personnalisé amélioré pour gérer les opérations asynchrones
  * Inclut retry automatique, gestion d'erreurs centralisée et notifications
  */
-export function useAsyncOperation<T extends any[]>(
+export function useAsyncOperation<T extends unknown[]>(
   operation: (...args: T) => Promise<void>,
   options: AsyncOperationOptions = {}
 ) {
@@ -127,7 +127,7 @@ export function useAsyncOperation<T extends any[]>(
 
   const isClientError = (error: Error): boolean => {
     // Vérifier si c'est une erreur API avec status code
-    const apiError = error as any;
+    const apiError = error as Error & { statusCode?: number };
     if (apiError.statusCode && apiError.statusCode >= 400 && apiError.statusCode < 500) {
       return true;
     }

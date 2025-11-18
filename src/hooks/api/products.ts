@@ -19,8 +19,9 @@ const normalizeProductsResponse = (response: unknown): Product[] => {
     return [];
   }
 
-  if (Array.isArray((response as any).data)) {
-    return (response as { data: Product[] }).data;
+  const responseObj = response as { data?: unknown };
+  if (Array.isArray(responseObj.data)) {
+    return responseObj.data as Product[];
   }
 
   if (Array.isArray(response)) {
@@ -35,8 +36,9 @@ const normalizeProductResponse = (response: unknown): Product | null => {
     return null;
   }
 
-  if ((response as any).data) {
-    return (response as { data: Product }).data ?? null;
+  const responseObj = response as { data?: unknown };
+  if (responseObj.data) {
+    return (responseObj.data as Product) ?? null;
   }
 
   return response as Product;

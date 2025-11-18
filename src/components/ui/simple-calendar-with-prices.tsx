@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { Calendar } from "@/components/ui/calendar";
+import type { Locale } from "date-fns";
 
 interface SimpleCalendarWithPricesProps {
   mode: "single";
@@ -8,7 +9,7 @@ interface SimpleCalendarWithPricesProps {
   disabled?: (date: Date) => boolean;
   defaultMonth?: Date;
   initialFocus?: boolean;
-  locale?: any;
+  locale?: Locale;
   basePrice: number;
   className?: string;
 }

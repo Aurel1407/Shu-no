@@ -173,7 +173,7 @@ const ManageContacts = () => {
 
     // Tri
     filtered.sort((a, b) => {
-      let aValue: any, bValue: any;
+      let aValue: string | number, bValue: string | number;
 
       switch (sortBy) {
         case "name":
@@ -325,7 +325,7 @@ const ManageContacts = () => {
                   <Label htmlFor="status-filter">Statut</Label>
                   <Select
                     value={filterStatus}
-                    onValueChange={(value: any) => setFilterStatus(value)}
+                    onValueChange={(value: string) => setFilterStatus(value)}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -340,7 +340,7 @@ const ManageContacts = () => {
 
                 <div className="space-y-2">
                   <Label htmlFor="sort-by">Trier par</Label>
-                  <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
+                  <Select value={sortBy} onValueChange={(value: string) => setSortBy(value)}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -354,7 +354,7 @@ const ManageContacts = () => {
 
                 <div className="space-y-2">
                   <Label htmlFor="sort-order">Ordre</Label>
-                  <Select value={sortOrder} onValueChange={(value: any) => setSortOrder(value)}>
+                  <Select value={sortOrder} onValueChange={(value: string) => setSortOrder(value)}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>

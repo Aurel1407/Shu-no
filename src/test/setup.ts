@@ -57,12 +57,14 @@ class IntersectionObserverMock {
             time: Date.now(),
           },
         ],
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         this as any
       );
     }, 0);
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 globalThis.IntersectionObserver = IntersectionObserverMock as any;
 
 // Mock global pour lucide-react avec toutes les icônes
@@ -71,6 +73,7 @@ vi.mock("lucide-react", async (importOriginal) => {
   // Créer un mock générique pour toutes les icônes
   const createIconMock =
     (name: string) =>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ({ className, ...props }: any) =>
       `${name} Icon`;
 
