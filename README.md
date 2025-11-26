@@ -7,6 +7,10 @@
 [![Tests](https://img.shields.io/badge/tests-96.67%25-brightgreen.svg)](docs/technique/COVERAGE_REPORT.md)
 [![Performance](https://img.shields.io/badge/Lighthouse-93%2F100-success.svg)](docs/sprints/SPRINT2_PERFORMANCE_RAPPORT.md)
 [![Accessibility](https://img.shields.io/badge/WCAG_AAA-100%25-blue.svg)](docs/sprints/SPRINT3_QUALITE_RAPPORT.md)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Aurel1407_Shu-no&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Aurel1407_Shu-no)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=Aurel1407_Shu-no&metric=coverage)](https://sonarcloud.io/summary/new_code?id=Aurel1407_Shu-no)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=Aurel1407_Shu-no&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=Aurel1407_Shu-no)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=Aurel1407_Shu-no&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=Aurel1407_Shu-no)
 
 > Plateforme full-stack moderne pour la location de gîtes en Bretagne (Côte de Goëlo), développée avec TypeScript, React, et Express.  
 > **Projet de stage DWWM - Production-ready depuis le 29/10/2025 ✅**
